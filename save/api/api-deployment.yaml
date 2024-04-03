@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+
+kind: Deployment
+
+metadata:
+  name: api
+  labels:
+    app: api
+
+spec:
+  selector:
+    matchLabels:
+      app: api
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      serviceAccountName: main-sa
+      containers:
+        - name: api
+          image: 806473340808.dkr.ecr.sa-east-1.amazonaws.com/tangram-api:latest
+          resources:
+          ports:
+            - containerPort: 3000
+          envFrom:
+          - configMapRef:
+              name: api-configmap
+          - secretRef:
+              name: api-secrets

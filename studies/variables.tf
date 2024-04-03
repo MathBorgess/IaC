@@ -4,3 +4,6 @@ variable "prefix" {
 variable "cluster_name" {
   type = string
 }
+variable "retention_days" {
+  type = number
+}
