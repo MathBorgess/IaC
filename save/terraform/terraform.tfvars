@@ -1,6 +1,6 @@
-prefix = "tangram"
-cluster_name = "production"
-retention_days = 30
-desired_size = 3
-max_size = 4
-min_size = 2
+prefix         = "IaC"
+cluster_name   = "Kubernetes"
+retention_days = 1
+desired_size   = 1
+max_size       = 1
+min_size       = 1
