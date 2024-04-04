@@ -10,3 +10,13 @@ Furthermore, remember to map the ports in the API directory, the ports that are 
 
 The ECR_IMAGE will be in the name of ${var.prefix}-api, so care of it.
 Do not forget of the ECR_IMAGE also in the api-deployment.yaml file.
+
+Cloudflare->Origin Server->Coloca o domínio e gera o certificado para substituir dentro do ingress
+
+to create the load balancer and attach it to kube, use the following command:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.10.0/deploy/static/provider/aws/deploy.yaml
+```
+
+after, run the tls command, and after, apply the ingress file.

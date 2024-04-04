@@ -1,1 +1,1 @@
-kubectl create secret tls ingress-tls --key origin-ca.pk  --cert origin-ca.crt -nqa
+kubectl create secret tls ingress-tls --key origin-ca.pk  --cert origin-ca.crt
