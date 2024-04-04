@@ -98,7 +98,7 @@ resource "aws_eks_cluster" "cluster" {
 }
 
 resource "aws_ecr_repository" "tangram-image" {
-  name                 = "tangram-api"
+  name                 = "${prefix}-api"
   image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {

@@ -8,4 +8,5 @@ the oidc file needs the cluster name {CLUSTER_NAME}, so care of it.
 
 Furthermore, remember to map the ports in the API directory, the ports that are mapped in the API directory should be the same as the ones that are mapped in the dockerfile, to expose the API.
 
+The ECR_IMAGE will be in the name of ${var.prefix}-api, so care of it.
 Do not forget of the ECR_IMAGE also in the api-deployment.yaml file.
