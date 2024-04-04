@@ -20,3 +20,5 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/cont
 ```
 
 after, run the tls command, and after, apply the ingress file.
+
+Remember that, in our case, we`re using the default namespace
