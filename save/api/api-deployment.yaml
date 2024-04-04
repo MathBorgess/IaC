@@ -20,12 +20,12 @@ spec:
       serviceAccountName: main-sa
       containers:
         - name: api
-          image: 806473340808.dkr.ecr.sa-east-1.amazonaws.com/tangram-api:latest
+          image: ECR_IMAGE
           resources:
           ports:
-            - containerPort: 3000
+            - containerPort:
           envFrom:
-          - configMapRef:
-              name: api-configmap
-          - secretRef:
-              name: api-secrets
+            - configMapRef:
+                name: api-configmap
+            - secretRef:
+                name: api-secrets

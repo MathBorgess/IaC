@@ -1,4 +1,4 @@
-name: Deploy to Prod
+name: Deploy to PROD
 
 on:
   workflow_dispatch:
@@ -6,42 +6,42 @@ on:
       service:
         required: false
         description: Service that will be deployed
-        default: 'api'
+        default: "api"
       tag:
         required: true
         description: service tag version
 env:
-  AWS_REGION: sa-east-1
+  AWS_REGION:
+  CLUSTER_NAME:
 
 jobs:
   deploy-to-prod:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{env.AWS_REGION}}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{env.AWS_REGION}}
 
-    - name: Update version in deployment
-      run: sed -i -- 's/latest/${{ github.event.inputs.tag }}/g' api/${{ github.event.inputs.service }}-deployment.yaml
-    
-    - name: Update kube config
-      run: aws eks update-kubeconfig --name tangram-production --region sa-east-1
+      - name: Update version in deployment
+        run: sed -i -- 's/latest/${{ github.event.inputs.tag }}/g' api/${{ github.event.inputs.service }}-deployment.yaml
 
-    - name: Apply secrets
-      run: kubectl apply -f api/${{ github.event.inputs.service }}-secret.yaml -n prod
-    
-    - name: Apply configmaps
-      run: kubectl apply -f api/${{ github.event.inputs.service }}-configmap.yaml -n prod
-    
-    - name: Deploy changes into cluster
-      run: kubectl apply -f api/${{ github.event.inputs.service }}-deployment.yaml -n prod
-      
-    - name: Verify deployment
-      run: kubectl rollout status deployment/api -n prod
+      - name: Update kube config
+        run: aws eks update-kubeconfig --name ${{env.CLUSTER_NAME}} --region ${{env.AWS_REGION}}
+
+      - name: Apply secrets
+        run: kubectl apply -f api/${{ github.event.inputs.service }}-secret.yaml -n prod
+
+      - name: Apply configmaps
+        run: kubectl apply -f api/${{ github.event.inputs.service }}-configmap.yaml -n prod
+
+      - name: Deploy changes into cluster
+        run: kubectl apply -f api/${{ github.event.inputs.service }}-deployment.yaml -n prod
+
+      - name: Verify deployment
+        run: kubectl rollout status deployment/api -n prod

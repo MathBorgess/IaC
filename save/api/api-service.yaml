@@ -10,6 +10,6 @@ spec:
     app: api
   type: ClusterIP
   ports:
-  - name: api
-    port: 3000
-    protocol: TCP
+    - name: api
+      port:
+      protocol: TCP

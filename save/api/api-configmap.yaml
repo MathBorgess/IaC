@@ -6,13 +6,4 @@ metadata:
   name: api-configmap
 
 data:
-  SECRET: "tangramV1.6-prod"
-  TANGRAM_DEFAULT_HOUR: "7"
-  SALT: "5"
-  REDIS_HOST: ""
-  MAILER: "no.reply.tangram@gmail.com"
-  BUCKET: "tangram-game-profile-photo"
-  testFlag: "@tangram.com"
-  newFaseTime: "T09:00:00"
-  xApiKey: "tangramgame2020"
-  CRON_EXPRESSION: "0 * 1 * * *"
+  PUBLIC_ENV: "DATA"

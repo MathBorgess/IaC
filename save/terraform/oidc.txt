@@ -1,2 +1,2 @@
-eksctl utils associate-iam-oidc-provider --cluster tangram-production --region sa-east-1 --approve
+eksctl utils associate-iam-oidc-provider --cluster {CLUSTER_NAME} --region sa-east-1 --approve
 https://rahullokurte.com/how-to-connect-to-s3-from-eks-using-the-iam-role-for-the-service-account
