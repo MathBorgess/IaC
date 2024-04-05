@@ -21,4 +21,4 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/cont
 
 after, run the tls command, and after, apply the ingress file.
 
-Remember that, in our case, we need to create a namespace and fill the namespace in the ingress file, and deploy action.
+Remember that, in our case, we need to create a namespace and fill the namespace in the ingress file, apply the service-account.yaml to create the permitions, and deploy action.

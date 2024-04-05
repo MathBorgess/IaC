@@ -40,7 +40,7 @@ jobs:
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Deploy to PROD
-          repo: TangramEd/tangram-api-infra-prod
+          repo: {owner}/{repo}
           token: ${{ secrets.INFRA_WORKFLOW_TOKEN }}
           ref: "refs/heads/main"
           inputs: '{ "tag": "${{ github.run_number }}" }'
