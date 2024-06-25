@@ -35,13 +35,13 @@ jobs:
         run: aws eks update-kubeconfig --name ${{env.CLUSTER_NAME}} --region ${{env.AWS_REGION}}
 
       - name: Apply secrets
-        run: kubectl apply -f api/${{ github.event.inputs.service }}-secret.yaml -n namespace
+        run: kubectl apply -f api/${{ github.event.inputs.service }}-secret.yaml -n prod
 
       - name: Apply configmaps
-        run: kubectl apply -f api/${{ github.event.inputs.service }}-configmap.yaml -n namespace
+        run: kubectl apply -f api/${{ github.event.inputs.service }}-configmap.yaml -n prod
 
       - name: Deploy changes into cluster
-        run: kubectl apply -f api/${{ github.event.inputs.service }}-deployment.yaml -n namespace
+        run: kubectl apply -f api/${{ github.event.inputs.service }}-deployment.yaml -n prod
 
       - name: Verify deployment
         run: kubectl rollout status deployment/api

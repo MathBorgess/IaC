@@ -38,13 +38,13 @@ resource "aws_iam_role" "cluster" {
     {
       "Effect": "Allow",
       "Principal": {
-        "Federated": "arn:aws:iam::387517654379:oidc-provider/oidc.eks.sa-east-1.amazonaws.com/id/B13B3E157836FA66AA425AAF5CFF68B7"
+        "Federated": "arn:aws:iam::387517654379:oidc-provider/oidc.eks.sa-east-1.amazonaws.com/id/${vars.oidc}"
       },
       "Action": "sts:AssumeRoleWithWebIdentity",
       "Condition": {
         "StringEquals": {
-          "oidc-provider/oidc.eks.sa-east-1.amazonaws.com/id/B13B3E157836FA66AA425AAF5CFF68B7:aud": "sts.amazonaws.com",
-          "oidc-provider/oidc.eks.sa-east-1.amazonaws.com/id/B13B3E157836FA66AA425AAF5CFF68B7:sub": "system:serviceaccount:qa:main-sa"
+          "oidc-provider/oidc.eks.sa-east-1.amazonaws.com/id/${vars.oidc}:aud": "sts.amazonaws.com",
+          "oidc-provider/oidc.eks.sa-east-1.amazonaws.com/id/${vars.oidc}:sub": "system:serviceaccount:qa:main-sa"
         }
       }
     }

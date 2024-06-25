@@ -30,3 +30,14 @@ its necessary to create the secret with the certificate and the key, to do that,
 ```
 
 comment about ingress config, oidc
+
+ingress command to create the load balancer and attach it to kube:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.10.0/deploy/static/provider/aws/deploy.yaml
+```
+
+after it, creates the tls secret and apply the ingress file.
+Also, apply the API-SERVICE file, so it could be connected to the load balancer by the host name.
+
+the oidc url needs to be connected with the [IAM role](https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html), so care of it, also, take the ID of the OIDC and change the POLICES at the terraform.
