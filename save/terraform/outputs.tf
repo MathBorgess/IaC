@@ -18,7 +18,7 @@ users:
 - name: "${aws_eks_cluster.cluster.name}"
   user:
     exec:
-      apiVersion: client.authentication.k8s.io/v1alpha1
+      apiVersion: client.authentication.k8s.io/v1beta1
       command: aws-iam-authenticator
       args:
         - "token"
@@ -29,5 +29,5 @@ KUBECONFIG
 
 resource "local_file" "kubeconfig" {
   filename = "kubeconfig"
-  content = local.kubeconfig
+  content  = local.kubeconfig
 }

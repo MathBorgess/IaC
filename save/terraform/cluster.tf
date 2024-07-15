@@ -105,3 +105,11 @@ resource "aws_ecr_repository" "tangram-image" {
     scan_on_push = true
   }
 }
+module "eks-cluster-autoscaler" {
+  source                           = "lablabs/eks-cluster-autoscaler/aws"
+  version                          = "2.2.0"
+  cluster_name                     = aws_eks_cluster.cluster.cluster_id
+  cluster_identity_oidc_issuer     = "https://oidc.eks.sa-east-1.amazonaws.com/id/${var.oidc}"
+  cluster_identity_oidc_issuer_arn = "arn:aws:iam::387517654379:oidc-provider/oidc.eks.sa-east-1.amazonaws.com/id/${vars.oidc}"
+}
+

@@ -41,3 +41,18 @@ after it, creates the tls secret and apply the ingress file.
 Also, apply the API-SERVICE file, so it could be connected to the load balancer by the host name.
 
 the oidc url needs to be connected with the [IAM role](https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html), so care of it, also, take the ID of the OIDC and change the POLICES at the terraform.
+
+to install grafana, look at the docs: https://grafana.com/docs/grafana/latest/setup-grafana/installation/kubernetes/
+
+to be able to see the metrics of the cluster and HPA, use:
+
+```bash
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+```
+
+and then, to apply the VPA, you will need to set the kubeconfig vars
+
+```bash
+export KUBECONFIG
+export KUBE_CONFIG_PATH
+```
