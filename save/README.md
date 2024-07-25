@@ -56,3 +56,52 @@ and then, to apply the VPA, you will need to set the kubeconfig vars
 export KUBECONFIG
 export KUBE_CONFIG_PATH
 ```
+
+setup fluent bit to log on cloudwatch:
+
+```bash
+kubectl create namespace amazon-cloudwatch
+
+
+cat << EOF | kubectl apply -f -
+# create cwagent service account and role binding
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+name: cloudwatch-agent
+namespace: amazon-cloudwatch
+annotations:
+# set this with value of OIDC_IAM_ROLE
+eks.amazonaws.com/role-arn: "$RoleARN"
+# optional: Defaults to "sts.amazonaws.com" if not set
+eks.amazonaws.com/audience: "sts.amazonaws.com"
+# optional: When set to "true", adds AWS_STS_REGIONAL_ENDPOINTS env var
+#   to containers
+eks.amazonaws.com/sts-regional-endpoints: "true"
+# optional: Defaults to 86400 for expirationSeconds if not set
+#   Note: This value can be overwritten if specified in the pod
+#         annotation as shown in the next step.
+eks.amazonaws.com/token-expiration: "86400"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+name: fluent-bit
+namespace: amazon-cloudwatch
+annotations:
+# set this with value of OIDC_IAM_ROLE
+eks.amazonaws.com/role-arn: "$RoleARN"
+# optional: Defaults to "sts.amazonaws.com" if not set
+eks.amazonaws.com/audience: "sts.amazonaws.com"
+# optional: When set to "true", adds AWS_STS_REGIONAL_ENDPOINTS env var
+#   to containers
+eks.amazonaws.com/sts-regional-endpoints: "true"
+# optional: Defaults to 86400 for expirationSeconds if not set
+#   Note: This value can be overwritten if specified in the pod
+#         annotation as shown in the next step.
+eks.amazonaws.com/token-expiration: "86400"
+EOF
+
+kubectl apply -f "https://anywhere.eks.amazonaws.com/manifests/fluentbit.yaml"
+
+```

@@ -22,6 +22,10 @@ spec:
         - name: api
           image: ECR_IMAGE
           resources:
+            limits:
+              cpu: "Vm"
+            requests:
+              cpu: "Vm"
           ports:
             - containerPort:
           envFrom:
