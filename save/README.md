@@ -59,17 +59,6 @@ export KUBE_CONFIG_PATH
 
 setup fluent bit to log on cloudwatch:
 
-vars:
-
-```bash
-export ClusterName=tangram-olympic
-export RegionName=sa-east-1
-```
-
-```bash
-
-```
-
 ```bash
 kubectl create namespace amazon-cloudwatch
 ClusterName=""
