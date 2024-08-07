@@ -59,47 +59,38 @@ export KUBE_CONFIG_PATH
 
 setup fluent bit to log on cloudwatch:
 
+vars:
+
+```bash
+export ClusterName=tangram-olympic
+export RegionName=sa-east-1
+```
+
+```bash
+
+```
+
 ```bash
 kubectl create namespace amazon-cloudwatch
+ClusterName=""
+RegionName=""
+FluentBitHttpPort='2020'
+FluentBitReadFromHead='Off'
+[[ ${FluentBitReadFromHead} = 'On' ]] && FluentBitReadFromTail='Off'|| FluentBitReadFromTail='On'
+[[ -z ${FluentBitHttpPort} ]] && FluentBitHttpServer='Off' || FluentBitHttpServer='On'
+kubectl create configmap fluent-bit-cluster-info \
+--from-literal=cluster.name=${ClusterName} \
+--from-literal=http.server=${FluentBitHttpServer} \
+--from-literal=http.port=${FluentBitHttpPort} \
+--from-literal=read.head=${FluentBitReadFromHead} \
+--from-literal=read.tail=${FluentBitReadFromTail} \
+--from-literal=logs.region=${RegionName} -n amazon-cloudwatch \\
 
+eksctl create iamserviceaccount --region ${RegionName} --name fluent-bit --namespace amazon-cloudwatch --cluster ${ClusterName} --attach-policy-arn arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy --override-existing-serviceaccounts --approve
 ```
 
-add this on service-account.yaml and configure the namespace
-
-```yaml
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: main-sa
-  namespace: prod
-  annotations:
-    eks.amazonaws.com/role-arn: arn:aws:iam::806473340808:role/tangram-olympic-role
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: cloudwatch-agent
-  namespace: amazon-cloudwatch
-  annotations:
-    eks.amazonaws.com/role-arn:
-    eks.amazonaws.com/audience: "sts.amazonaws.com"
-    eks.amazonaws.com/sts-regional-endpoints: "true"
-    eks.amazonaws.com/token-expiration: "86400"
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: fluent-bit
-  namespace: amazon-cloudwatch
-  annotations:
-    eks.amazonaws.com/role-arn:
-    eks.amazonaws.com/audience: "sts.amazonaws.com"
-    eks.amazonaws.com/sts-regional-endpoints: "true"
-    eks.amazonaws.com/token-expiration: "86400"
-```
+Edite o arquivo fluent-bit.yaml e aplique-o:
 
 ```bash
-
-kubectl apply -f "https://anywhere.eks.amazonaws.com/manifests/fluentbit.yaml"
-
+kubectl apply -f fluent-bit.yaml
 ```
