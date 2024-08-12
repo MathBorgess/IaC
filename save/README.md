@@ -1,63 +1,56 @@
-To make the TLS work good, you have to create first the route to the API, then add it to the service and finally the ingress. The ingress will be the one that will manage the TLS certificate.
+To ensure proper TLS functionality, follow these steps:
 
-To generate the kubeconfig to connect to the cluster, you should use the terraform to generate the whole infrastructure and then generate the kubeconfig.
+1. Create the dns to the API.
+2. Add the dns to the service.
+3. Configure the ingress to manage the TLS certificate.
 
-To make the action to activate the infra`s action, you should create a GitHub token that has access to manage secrets, env and actions services in the infra, also set the AWS credentials in the secrets of the infra and API repository.
+To generate the kubeconfig for connecting to the cluster, use Terraform to create the infrastructure and then generate the kubeconfig.
 
-the oidc file needs the cluster name {CLUSTER_NAME}, so care of it.
+To activate the infrastructure's actions, follow these steps:
 
-Furthermore, remember to map the ports in the API directory, the ports that are mapped in the API directory should be the same as the ones that are mapped in the dockerfile, to expose the API.
+1. Create a GitHub token with access to manage secrets, environment variables, and actions services in the infrastructure and API repositories.
+2. Set the AWS credentials in the secrets of the infrastructure and API repositories.
 
-The ECR_IMAGE will be in the name of ${var.prefix}-api, so care of it.
-Do not forget of the ECR_IMAGE also in the api-deployment.yaml file.
+The oidc file requires the cluster name {CLUSTER_NAME}, so make sure to provide it.
 
-Cloudflare->Origin Server->Coloca o domínio e gera o certificado para substituir dentro do ingress
+Additionally, ensure that the ports mapped in the API directory match the ports mapped in the Dockerfile to expose the API.
 
-to create the load balancer and attach it to kube, use the following command:
+The ECR_IMAGE should be named ${var.prefix}-api, so keep that in mind. Don't forget to update the ECR_IMAGE in the api-deployment.yaml file as well.
 
-```bash
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.10.0/deploy/static/provider/aws/deploy.yaml
-```
-
-after, run the tls command, and after, apply the ingress file.
-
-Remember that, in our case, we need to create a namespace and fill the namespace in the ingress file, apply the service-account.yaml to create the permitions, and deploy action.
-
-its necessary to create the secret with the certificate and the key, to do that, use the following command:
-
-```bash
-
-```
-
-comment about ingress config, oidc
-
-ingress command to create the load balancer and attach it to kube:
+To create the load balancer and attach it to Kubernetes, run the following command:
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.10.0/deploy/static/provider/aws/deploy.yaml
 ```
 
-after it, creates the tls secret and apply the ingress file.
-Also, apply the API-SERVICE file, so it could be connected to the load balancer by the host name.
+After that, execute the tls command and apply the ingress file.
 
-the oidc url needs to be connected with the [IAM role](https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html), so care of it, also, take the ID of the OIDC and change the POLICES at the terraform.
+In our case, it's necessary to create a namespace and specify it in the ingress file. Apply the service-account.yaml file to grant the necessary permissions and deploy the action.
 
-to install grafana, look at the docs: https://grafana.com/docs/grafana/latest/setup-grafana/installation/kubernetes/
+To create the secret with the certificate and key, use the following command:
 
-to be able to see the metrics of the cluster and HPA, use:
+```bash
+kubectl create secret tls <SECRET_NAME> --cert=<CERTIFICATE_FILE> --key=<KEY_FILE> -n <NAMESPACE>
+```
+
+Make sure to replace `<SECRET_NAME>`, `<CERTIFICATE_FILE>`, `<KEY_FILE>`, and `<NAMESPACE>` with the appropriate values.
+
+Regarding the ingress configuration and oidc, ensure that the oidc URL is connected with the [IAM role](https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html). Also, take note of the OIDC ID and update the policies in the Terraform accordingly.
+
+To view the cluster metrics and enable HPA, run the following command:
 
 ```bash
 kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 ```
 
-and then, to apply the VPA, you will need to set the kubeconfig vars
+To apply the VPA, set the kubeconfig variables:
 
 ```bash
-export KUBECONFIG
-export KUBE_CONFIG_PATH
+export KUBECONFIG=<KUBECONFIG_PATH>
+export KUBE_CONFIG_PATH=<KUBECONFIG_PATH>
 ```
 
-setup fluent bit to log on cloudwatch:
+Set up Fluent Bit to log to CloudWatch:
 
 ```bash
 kubectl create namespace amazon-cloudwatch
@@ -78,7 +71,7 @@ kubectl create configmap fluent-bit-cluster-info \
 eksctl create iamserviceaccount --region ${RegionName} --name fluent-bit --namespace amazon-cloudwatch --cluster ${ClusterName} --attach-policy-arn arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy --override-existing-serviceaccounts --approve
 ```
 
-Edite o arquivo fluent-bit.yaml e aplique-o:
+Edit the fluent-bit.yaml file and apply it:
 
 ```bash
 kubectl apply -f fluent-bit.yaml
