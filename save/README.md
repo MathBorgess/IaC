@@ -76,3 +76,10 @@ Edit the fluent-bit.yaml file and apply it:
 ```bash
 kubectl apply -f fluent-bit.yaml
 ```
+
+Dump a Postgres Database and copy it to another:
+
+```bash
+pg_dump -h <HOST> -U <USER> -Fc <DATABASE> > <FILE_NAME>.dump
+pg_restore -h <HOST> -U <USER> -d <DATABASE> <FILE_NAME>.dump
+```
