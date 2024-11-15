@@ -6,12 +6,14 @@
     state: present
     update_cache: yes
 
-- name: Init nginx
-  service:
-    name: nginx
-    state: started
-
 - name: Copy nginx config
   copy:
     src: nginx.conf
     dest: /etc/nginx/nginx.conf
+
+
+- name: Init nginx
+  service:
+    name: nginx
+    state: started
+  
