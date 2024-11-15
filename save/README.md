@@ -82,4 +82,13 @@ Dump a Postgres Database and copy it to another:
 ```bash
 pg_dump -h <HOST> -U <USER> -Fc <DATABASE> > <FILE_NAME>.dump
 pg_restore -h <HOST> -U <USER> -d <DATABASE> <FILE_NAME>.dump
+
+
+pg_dump -h tangramgamestage.cxbcoravi8jc.sa-east-1.rds.amazonaws.com -U postgres -Fc tangramgameprod > dump.dump
+
+# on db
+DROP SCHEMA public CASCADE;
+CREATE SCHEMA public;
+
+pg_restore -h tangram-db-qa.cxbcoravi8jc.sa-east-1.rds.amazonaws.com -U postgres -d tangramdbqa dump.dump
 ```

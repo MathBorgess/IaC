@@ -1,0 +1,34 @@
+# Defining two secrets in the repository settings:
+# ANSIBLE_USER: The user to use for the SSH connection to the server
+
+name: Deploy with Ansible
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [closed]
+
+jobs:
+  deploy:
+    name: Deploy Ansible Playbook
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+          
+      - name: Install Ansible
+        shell: bash
+        run: |
+          sudo apt update
+          sudo apt install -y ansible
+
+      - name: Run Ansible Playbook
+        env:
+          ANSIBLE_USER: ${{ secrets.ANSIBLE_USER }}
+          ANSIBLE_HOST_KEY_CHECKING: False
+        run: |
+          ansible-galaxy install -r requirements.yml
+          ansible-playbook -i HOST roles/main.yml -u ${{ secrets.ANSIBLE_USER }}

@@ -1,7 +1,7 @@
 
 
 resource "aws_iam_role" "node" {
-  name = "${var.prefix}-${var.cluster_name}-role-node"
+  name               = "${var.prefix}-${var.cluster_name}-role-node"
   assume_role_policy = <<POLICY
 {
   "Version": "2012-10-17",
@@ -34,17 +34,17 @@ resource "aws_iam_role_policy_attachment" "node-AmazonEC2ContainerRegistryReadOn
 }
 
 resource "aws_eks_node_group" "node-1" {
-  cluster_name = aws_eks_cluster.cluster.name
+  cluster_name    = aws_eks_cluster.cluster.name
   node_group_name = "node-1"
-  node_role_arn = aws_iam_role.node.arn
-  subnet_ids = aws_subnet.subnets[*].id
-  instance_types = ["t3.medium"]
+  node_role_arn   = aws_iam_role.node.arn
+  subnet_ids      = aws_subnet.subnets[*].id
+  instance_types  = ["t3.medium"]
   scaling_config {
     desired_size = var.desired_size
-    max_size = var.max_size
-    min_size = var.min_size
+    max_size     = var.max_size
+    min_size     = var.min_size
   }
-  
+
   depends_on = [
     aws_iam_role_policy_attachment.node-AmazonEKSWorkerNodePolicy,
     aws_iam_role_policy_attachment.node-AmazonEKS_CNI_Policy,

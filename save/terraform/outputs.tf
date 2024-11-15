@@ -25,9 +25,23 @@ users:
         - "-i"
         - "${aws_eks_cluster.cluster.name}"
 KUBECONFIG
+
+  hosts = <<EOF
+${aws_instance.bastion.public_ip}
+
+[all:vars]
+ansible_ssh_private_key_file=${path.module}/../ansible/terraform.pem
+ansible_user=ubuntu
+EOF
 }
+
 
 resource "local_file" "kubeconfig" {
   filename = "kubeconfig"
   content  = local.kubeconfig
 }
+resource "local_file" "ansible_hosts" {
+  filename = "${path.module}/../ansible/inventory/hosts"
+  content  = local.hosts
+}
+
