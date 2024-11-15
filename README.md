@@ -1,3 +1,26 @@
+# IaC Resources Repository
+
+That repository contains the infrastructure as code resources for many projects that I've worked on.
+
+## Table of Contents
+
+[Ansible](#ansible)
+[Terraform](#terraform)
+[Kubernetes](#kubernetes)
+[Postgres](#postgres)
+
+## Ansible
+
+## Terraform
+
+### Terraform Outputs kubeconfig
+
+In general, the Terraform outputs the kubeconfig to the `kubeconfig` file. but there is a connection problem with v1beta1, so it could be necessary to edit the kubeconfig manually, and change it to v1alpha1.
+
+## Kubernetes
+
+### TLS Certificate
+
 To ensure proper TLS functionality, follow these steps:
 
 1. Create the dns to the API.
@@ -6,7 +29,9 @@ To ensure proper TLS functionality, follow these steps:
 
 To generate the kubeconfig for connecting to the cluster, use Terraform to create the infrastructure and then generate the kubeconfig.
 
-To activate the infrastructure's actions, follow these steps:
+### Activate the infrastructure's actions
+
+Follow these steps:
 
 1. Create a GitHub token with access to manage secrets, environment variables, and actions services in the infrastructure and API repositories.
 2. Set the AWS credentials in the secrets of the infrastructure and API repositories.
@@ -16,6 +41,8 @@ The oidc file requires the cluster name {CLUSTER_NAME}, so make sure to provide 
 Additionally, ensure that the ports mapped in the API directory match the ports mapped in the Dockerfile to expose the API.
 
 The ECR_IMAGE should be named ${var.prefix}-api, so keep that in mind. Don't forget to update the ECR_IMAGE in the api-deployment.yaml file as well.
+
+### Ingress configuration
 
 To create the load balancer and attach it to Kubernetes, run the following command:
 
@@ -37,6 +64,8 @@ Make sure to replace `<SECRET_NAME>`, `<CERTIFICATE_FILE>`, `<KEY_FILE>`, and `<
 
 Regarding the ingress configuration and oidc, ensure that the oidc URL is connected with the [IAM role](https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html). Also, take note of the OIDC ID and update the policies in the Terraform accordingly.
 
+### Metrics Server to Horizontal Pod Autoscaler
+
 To view the cluster metrics and enable HPA, run the following command:
 
 ```bash
@@ -49,6 +78,8 @@ To apply the VPA, set the kubeconfig variables:
 export KUBECONFIG=<KUBECONFIG_PATH>
 export KUBE_CONFIG_PATH=<KUBECONFIG_PATH>
 ```
+
+### Fluent Bit to CloudWatch
 
 Set up Fluent Bit to log to CloudWatch:
 
@@ -77,18 +108,23 @@ Edit the fluent-bit.yaml file and apply it:
 kubectl apply -f fluent-bit.yaml
 ```
 
-Dump a Postgres Database and copy it to another:
+## Postgres
+
+### Dump a Postgres Database and copy it to another:
 
 ```bash
 pg_dump -h <HOST> -U <USER> -Fc <DATABASE> > <FILE_NAME>.dump
-pg_restore -h <HOST> -U <USER> -d <DATABASE> <FILE_NAME>.dump
+```
 
+Remove the public schema and create a new one to restore the database:
 
-pg_dump -h tangramgamestage.cxbcoravi8jc.sa-east-1.rds.amazonaws.com -U postgres -Fc tangramgameprod > dump.dump
-
-# on db
+```sql
 DROP SCHEMA public CASCADE;
 CREATE SCHEMA public;
+```
 
-pg_restore -h tangram-db-qa.cxbcoravi8jc.sa-east-1.rds.amazonaws.com -U postgres -d tangramdbqa dump.dump
+Restore the database:
+
+```bash
+pg_restore -h <HOST> -U <USER> -d <DATABASE> <FILE_NAME>.dump
 ```
