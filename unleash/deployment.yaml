@@ -1,0 +1,122 @@
+apiVersion: v1
+
+kind: Namespace
+
+metadata:
+  name: unleash
+---
+apiVersion: v1
+
+kind: Service
+
+metadata:
+  namespace: unleash
+  name: unleash-service
+
+spec:
+  selector:
+    app: unleash
+  type: ClusterIP
+  ports:
+    - name: unleash
+      port:
+      protocol: TCP
+---
+apiVersion: v1
+
+kind: ConfigMap
+
+metadata:
+  namespace: unleash
+  name: unleash-configmap
+
+data:
+  DATABASE_HOST: postgres
+  DATABASE_NAME: unleash
+  DATABASE_USERNAME: unleash_user
+  DATABASE_PASSWORD: some_password
+  DATABASE_SSL: false
+
+---
+apiVersion: apps/v1
+
+kind: Deployment
+
+metadata:
+  namespace: unleash
+  name: unleash
+  labels:
+    app: unleash
+
+spec:
+  selector:
+    matchLabels:
+      app: unleash
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: unleash
+    spec:
+      containers:
+        - name: unleash
+          image: unleashorg/unleash-server
+          imagePullPolicy: Always
+          resources:
+            limits:
+              cpu: "Vm"
+            requests:
+              cpu: "Vm"
+          ports:
+            - containerPort: 4242
+          envFrom:
+            - configMapRef:
+                name: unleash-configmap
+            - secretRef:
+                name: unleash-secrets
+---
+# kubectl create secret tls unleash-tls --key origin-ca.pk  --cert origin-ca.crt -n unleash
+apiVersion: v1
+
+kind: Secret
+
+metadata:
+  name: unleash-tls
+  namespace: unleash
+
+type: kubernetes.io/tls
+
+data:
+  tls.crt: origin-ca.crt
+  tls.key: origin-ca.pk
+
+---
+apiVersion: networking.k8s.io/v1
+
+kind: Ingress
+
+metadata:
+  namespace: unleash
+  name: unleash-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    ingress.kubernetes.io/enable-cors: "true"
+
+    # nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+spec:
+  tls:
+    - hosts:
+        -
+      secretName: ingress-tls
+  rules:
+    - host: ""
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: unleash-service
+                port:
+                  number: 4242
