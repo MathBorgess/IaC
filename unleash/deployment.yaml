@@ -35,7 +35,9 @@ data:
   DATABASE_NAME: unleash
   DATABASE_USERNAME: unleash_user
   DATABASE_PASSWORD: some_password
-  DATABASE_SSL: false
+  DATABASE_SSL: '{ "rejectUnauthorized": false}'
+  UNLEASH_DEFAULT_ADMIN_USERNAME: "admin"
+  UNLEASH_DEFAULT_ADMIN_PASSWORD: "pass"
 
 ---
 apiVersion: apps/v1
@@ -61,43 +63,22 @@ spec:
       containers:
         - name: unleash
           image: unleashorg/unleash-server
-          imagePullPolicy: Always
-          resources:
-            limits:
-              cpu: "Vm"
-            requests:
-              cpu: "Vm"
+          imagePullPolicy: "Always"
           ports:
             - containerPort: 4242
           envFrom:
             - configMapRef:
                 name: unleash-configmap
-            - secretRef:
-                name: unleash-secrets
 ---
 # kubectl create secret tls unleash-tls --key origin-ca.pk  --cert origin-ca.crt -n unleash
-apiVersion: v1
-
-kind: Secret
-
-metadata:
-  name: unleash-tls
-  namespace: unleash
-
-type: kubernetes.io/tls
-
-data:
-  tls.crt: origin-ca.crt
-  tls.key: origin-ca.pk
-
 ---
 apiVersion: networking.k8s.io/v1
 
 kind: Ingress
 
 metadata:
-  namespace: unleash
   name: unleash-ingress
+  namespace: unleash
   annotations:
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
@@ -106,17 +87,17 @@ metadata:
     # nginx.ingress.kubernetes.io/proxy-body-size: "50m"
 spec:
   tls:
-    - hosts:
-        -
-      secretName: ingress-tls
+  - hosts:
+      - host
+    secretName: unleash-tls
   rules:
-    - host: ""
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: unleash-service
-                port:
-                  number: 4242
+  - host: "host"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: unleash-service
+            port:
+              number: 4242
