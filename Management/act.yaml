@@ -1,0 +1,38 @@
+name: PR Workflow
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  check-size:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Calculate lines of code in PR
+        run: |
+          git diff --stat origin/BRANCH | tail -1 | awk '{print $1 " lines changed"}'
+      - name: Fail if over 400 lines
+        run: exit 1
+        if: ${{ steps.stats.outputs.lines-changed }} > 400
+
+  test-and-review:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run tests
+        run: npm test
+
+      - name: Lint code
+        run: npm run lint
+
+      - name: Check PR labels
+        uses: actions-ecosystem/action-label-commenter@v1
+        with:
+          labels: "needs-review"
+          comment: "Waiting for review approval."

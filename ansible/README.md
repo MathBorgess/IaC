@@ -68,3 +68,9 @@ To install the ansible galaxy role, you can use the following command:
 ```bash
 ansible-galaxy install -r requirements.yml
 ```
+
+## Testing local
+
+ssh-keygen, it will generate the keys, and the ssh-copy-id USER@hostname will transfer, so you could connect
+
+run lsb_release -c to change the bionic

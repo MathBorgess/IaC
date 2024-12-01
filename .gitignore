@@ -1,3 +1,4 @@
 .terraform
 credentials.txt
 .vscode
+node_modules/

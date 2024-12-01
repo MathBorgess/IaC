@@ -8,6 +8,7 @@ That repository contains the infrastructure as code resources for many projects 
 [Terraform](#terraform)
 [Kubernetes](#kubernetes)
 [Postgres](#postgres)
+[Releasing](#releasing)
 
 ## Ansible
 
@@ -128,3 +129,5 @@ Restore the database:
 ```bash
 pg_restore -h <HOST> -U <USER> -d <DATABASE> <FILE_NAME>.dump
 ```
+
+## Releasing

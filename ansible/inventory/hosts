@@ -1,10 +1,6 @@
-[manager]
-54.90.7.203
+[master]
+control ansible_connection=local
 
 [worker]
-54.152.127.6
-3.87.222.109
-
-[all:vars]
-ansible_ssh_private_key_file=path/file.cer
-ansible_user=ubuntu
+node1
+node2

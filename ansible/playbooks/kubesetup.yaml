@@ -1,0 +1,78 @@
+---
+# - hosts: all
+#   roles:
+#     - role: ./roles/docker-7.4.3
+
+# - hosts: master
+#   roles:
+#     - role: ./roles/kubernetes-4.0.2
+
+# - hosts: worker
+#   roles:
+#     - role: ./roles/kubernetes-4.0.2
+#       vars:
+#         kubernetes_role: node
+- hosts: all
+  vars:
+    kubernetes_version: '1.31'
+
+    k8s_url_apt_key: "https://pkgs.k8s.io/core:/stable:/v{{ kubernetes_version }}/deb/Release.key"
+    k8s_gpgpath: /usr/share/keyrings/kubernetes-apt-keyring.gpg
+    k8s_repository: "https://pkgs.k8s.io/core:/stable:/v{{ kubernetes_version }}/deb/"
+
+  tasks:
+    - name: Install Docker n cUrl
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - docker.io
+        - curl
+
+    - name: Get Kubernetes package key
+      shell: curl -fsSL {{ k8s_url_apt_key }} | gpg --dearmor -o {{ k8s_gpgpath }}
+      args:
+        creates: "{{ k8s_gpgpath }}"
+
+    - name: Add Kubernetes repository
+      apt_repository:
+        repo: "deb [signed-by={{ k8s_gpgpath }}] {{ k8s_repository }} /"
+        state: present
+        filename: kubernetes
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install kubeadm, kubelet, and kubectl
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - kubeadm
+        - kubelet
+        - kubectl
+
+- hosts: master
+  tasks:
+    - name: Initialize Kubernetes master
+      command: kubeadm init --pod-network-cidr=10.244.0.0/16
+      register: kubeadm_output
+      ignore_errors: true
+
+    - name: Set up kubectl for the current user
+      command: "{{ item }}"
+      with_items:
+        - "mkdir -p $HOME/.kube"
+        - "cp /etc/kubernetes/admin.conf $HOME/.kube/config"
+        - "chown $(id -u):$(id -g) $HOME/.kube/config"
+
+    - name: Install Calico network plugin
+      command: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+      when: "'calico' in kubeadm_output.stdout"
+
+- hosts: worker
+  tasks:
+    - name: Join worker nodes to the cluster
+      command: "{{ hostvars['master']['kubeadm_output']['stdout_lines'][0] }}"
+      when: "'kubeadm join' in hostvars['master']['kubeadm_output']['stdout']"
