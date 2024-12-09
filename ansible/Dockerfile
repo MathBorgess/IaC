@@ -1,4 +1,5 @@
-FROM ubuntu:18.04
+# FROM ubuntu:18.04
+FROM amazonlinux:latest
 
 RUN apt-get update && apt-get install vim ssh ansible -y \
     && echo 'root:admin' | chpasswd \

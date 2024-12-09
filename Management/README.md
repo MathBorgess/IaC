@@ -37,6 +37,8 @@ ci - Commits do tipo ci indicam mudanças relacionadas a integração contínua 
 
 raw - Commits do tipo raw indicam mudanças relacionadas a arquivos de configurações, dados, features, parâmetros.
 
+discovery - discovery são estudos de tecnologias e criação de documentação das selecionadas para teste e implementação.
+
 cleanup - Commits do tipo cleanup são utilizados para remover código comentado, trechos desnecessários ou qualquer outra forma de limpeza do código-fonte, visando aprimorar sua legibilidade e manutenibilidade.
 
 remove - Commits do tipo remove indicam a exclusão de arquivos, diretórios ou funcionalidades obsoletas ou não utilizadas, reduzindo o tamanho e a complexidade do projeto e mantendo-o mais organizado.
