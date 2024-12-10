@@ -44,7 +44,7 @@ resource "aws_key_pair" "terraform" {
 
 resource "aws_instance" "host" {
   ami                         = data.aws_ami.ubuntu.id
-  instance_type               = "t3.micro"
+  instance_type               = "t2.small"
   associate_public_ip_address = true
   key_name                    = aws_key_pair.terraform.key_name
   security_groups             = [aws_security_group.allow_ssh.name]

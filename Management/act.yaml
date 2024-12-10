@@ -5,18 +5,18 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  check-size:
+  check_pr_size:
+    name: Check PR size doesn't break set limit
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Calculate lines of code in PR
-        run: |
-          git diff --stat origin/BRANCH | tail -1 | awk '{print $1 " lines changed"}'
-      - name: Fail if over 400 lines
-        run: exit 1
-        if: ${{ steps.stats.outputs.lines-changed }} > 400
+      # checkout your code with your git history
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: maidsafe/pr_size_checker@v2
+        with:
+          max_lines_changed: 400
+          min_lines_changed: 200
 
   test-and-review:
     runs-on: ubuntu-latest

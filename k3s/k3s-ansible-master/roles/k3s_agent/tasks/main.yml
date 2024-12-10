@@ -62,15 +62,9 @@
     group: root
     mode: "u=rw,g=r,o=r"
 
-- name: Enable and start K3s agent service
-  ansible.builtin.command:
-    cmd: "k3s agent"
-  environment:
-    K3S_TOKEN: "{{ token }}"
-    K3S_URL: "https://{{ hostvars[groups['server'][0]].ansible_host | default(groups['server'][0]) }}"
-
 - name: Enable and check K3s service
-  ansible.builtin.service:
-    name: k3s
-    state: "restarted"
+  ansible.builtin.systemd:
+    name: k3s-agent
+    daemon_reload: "{{ true if k3s_agent_service.changed else false }}"
+    state: "{{ 'restarted' if k3s_agent_service.changed else 'started' }}"
     enabled: true

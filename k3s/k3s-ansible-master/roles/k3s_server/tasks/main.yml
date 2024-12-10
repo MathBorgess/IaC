@@ -27,7 +27,7 @@
         mode: "0755"
 
     - name: Download K3s binary
-      ansible.builtin.shell:
+      ansible.builtin.command:
         cmd: /usr/local/bin/k3s-install.sh
       environment:
         INSTALL_K3S_SKIP_START: "true"
@@ -111,8 +111,6 @@
         daemon_reload: true
         state: restarted
 
-
-    
     - name: Enable and check K3s service
       when: ansible_facts.services['k3s.service'] is not defined or ansible_facts.services['k3s.service'].state != 'running'
       ansible.builtin.systemd:
@@ -136,14 +134,6 @@
 
     # Copy the k3s config to a second file to detect changes.
     # If no changes are found, we can skip copying the kubeconfig to the control node.
-
-    - name: Start k3s server temporarily to generate k3s.yaml
-      ansible.builtin.shell:
-        cmd: timeout 3s k3s server # --no-deploy traefik
-      ignore_errors: true
-      register: k3s_temp_start
-      changed_when: false
-
     - name: Copy k3s.yaml to second file
       ansible.builtin.copy:
         src: /etc/rancher/k3s/k3s.yaml
