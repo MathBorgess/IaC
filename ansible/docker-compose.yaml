@@ -7,8 +7,6 @@ services:
     command: >
       bash -c "tail -f /dev/null"
     hostname: control
-    ports:
-      - "6443:6443"
     volumes:
       - .:/root/ansible
 

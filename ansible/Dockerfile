@@ -1,6 +1,9 @@
 # FROM ubuntu:18.04
 FROM ubuntu:24.04
 
+EXPOSE 22
+EXPOSE 6443
+
 RUN apt-get update && apt-get install vim ssh ansible -y \
     && echo 'root:admin' | chpasswd \
     && sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config \

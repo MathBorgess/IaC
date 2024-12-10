@@ -2,3 +2,8 @@
 credentials.txt
 .vscode
 node_modules/
+venv
+.venv
+.vagrant
+inventory.yml
+playbook/debug.yml

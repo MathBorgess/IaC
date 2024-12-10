@@ -1,30 +1,39 @@
 # Build a Kubernetes cluster using K3s via Ansible
 
+port to be open:
+
+- 5001/tcp # Spegel (Embedded distributed registry)
+- 8472/udp # Flannel VXLAN
+- 10250/tcp # Kubelet metrics
+- 51820/udp # Flannel Wireguard (IPv4)
+- 51821/udp # Flannel Wireguard (IPv6)
+
 Author: <https://github.com/itwars>  
 Current Maintainer: <https://github.com/dereknola>
 
 Easily bring up a cluster on machines running:
 
-- [X] Debian
-- [X] Ubuntu
-- [X] Raspberry Pi OS
-- [X] RHEL Family (CentOS, Redhat, Rocky Linux...)
-- [X] SUSE Family (SLES, OpenSUSE Leap, Tumbleweed...)
-- [X] ArchLinux
+- [x] Debian
+- [x] Ubuntu
+- [x] Raspberry Pi OS
+- [x] RHEL Family (CentOS, Redhat, Rocky Linux...)
+- [x] SUSE Family (SLES, OpenSUSE Leap, Tumbleweed...)
+- [x] ArchLinux
 
 on processor architectures:
 
-- [X] x64
-- [X] arm64
-- [X] armhf
+- [x] x64
+- [x] arm64
+- [x] armhf
 
 ## System requirements
 
 The control node **must** have Ansible 8.0+ (ansible-core 2.15+)
 
 All managed nodes in inventory must have:
+
 - Passwordless SSH access
-- Root access (or a user with equivalent permissions) 
+- Root access (or a user with equivalent permissions)
 
 It is also recommended that all managed nodes disable firewalls and swap. See [K3s Requirements](https://docs.k3s.io/installation/requirements) for more information.
 
@@ -37,6 +46,7 @@ cp inventory-sample.yml inventory.yml
 ```
 
 Second edit the inventory file to match your cluster setup. For example:
+
 ```bash
 k3s_cluster:
   children:
@@ -55,7 +65,6 @@ If multiple hosts are in the server group the playbook will automatically setup 
 An odd number of server nodes is required (3,5,7). Read the [official documentation](https://docs.k3s.io/datastore/ha-embedded) for more information.
 
 Setting up a loadbalancer or VIP beforehand to use as the API endpoint is possible but not covered here.
-
 
 Start provisioning of the cluster using the following command:
 
@@ -100,6 +109,7 @@ ansible-playbook playbooks/upgrade.yml -i inventory.yml
 Airgap installation is supported via the `airgap_dir` variable. This variable should be set to the path of a directory containing the K3s binary and images. The release artifacts can be downloaded from the [K3s Releases](https://github.com/k3s-io/k3s/releases). You must download the appropriate images for you architecture (any of the compression formats will work).
 
 An example folder for an x86_64 cluster:
+
 ```bash
 $ ls ./playbooks/my-airgap/
 total 248M
@@ -113,12 +123,11 @@ airgap_dir: ./my-airgap # Paths are relative to the playbooks directory
 
 Additionally, if deploying on a OS with SELinux, you will also need to download the latest [k3s-selinux RPM](https://github.com/k3s-io/k3s-selinux/releases/latest) and place it in the airgap folder.
 
-
-It is assumed that the control node has access to the internet. The playbook will automatically download the k3s install script on the control node, and then distribute all three artifacts to the managed nodes. 
+It is assumed that the control node has access to the internet. The playbook will automatically download the k3s install script on the control node, and then distribute all three artifacts to the managed nodes.
 
 ## Kubeconfig
 
-After successful bringup, the kubeconfig of the cluster is copied to the control node  and merged with `~/.kube/config` under the `k3s-ansible` context.
+After successful bringup, the kubeconfig of the cluster is copied to the control node and merged with `~/.kube/config` under the `k3s-ansible` context.
 Assuming you have [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl) installed, you can confirm access to your **Kubernetes** cluster with the following:
 
 ```bash
@@ -141,6 +150,7 @@ By default, each node is given 2 cores and 2GB of RAM and runs Ubuntu 20.04. You
 ## Need More Features?
 
 This project is intended to provide a "vanilla" K3s install. If you need more features, such as:
+
 - Private Registry
 - Advanced Storage (Longhorn, Ceph, etc)
 - External Database
@@ -148,6 +158,7 @@ This project is intended to provide a "vanilla" K3s install. If you need more fe
 - Alternative CNIs
 
 See these other projects:
+
 - https://github.com/PyratLabs/ansible-role-k3s
 - https://github.com/techno-tim/k3s-ansible
 - https://github.com/jon-stumpf/k3s-ansible

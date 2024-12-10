@@ -5,8 +5,6 @@
   become: true
   roles:
     - role: prereq
-    - role: airgap
-    - role: raspberrypi
 
 - name: Setup K3S server
   hosts: server
@@ -19,3 +17,9 @@
   become: true
   roles:
     - role: k3s_agent
+
+- name: Setup Nginx ingress
+  hosts: server
+  become: true
+  roles:
+    - role: nginx_ingress_setup

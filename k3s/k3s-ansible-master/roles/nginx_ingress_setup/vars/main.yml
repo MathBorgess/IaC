@@ -1,0 +1,2 @@
+---
+ingress_version: "1.12.0-beta.0"  # noqa var-naming[no-role-prefix]

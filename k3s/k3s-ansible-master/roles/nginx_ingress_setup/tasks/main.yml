@@ -1,0 +1,29 @@
+---
+- name: Check if kubectl is configured
+  command: kubectl config current-context
+  register: kubectl_context
+  ignore_errors: true
+
+- name: Apply NGINX ingress controller if kubectl is configured
+  command: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v{{ingress_version}}/deploy/static/provider/cloud/deploy.yaml
+  when: kubectl_context.rc == 0
+
+- name: Wait for NGINX ingress controller to be ready
+  command: kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=300s
+  when: kubectl_context.rc == 0
+  
+- name: Copy origin-ca.pk file to remote host
+  copy:
+    src: files/origin-ca.pk
+    dest: ./origin-ca.pk
+    mode: '0600'
+
+- name: Copy origin-ca.crt file to remote host
+  copy:
+    src: files/origin-ca.crt
+    dest: ./origin-ca.crt
+    mode: '0600'
+
+- name: Create secret for ingress
+  command: kubectl create secret tls ingress-tls --key origin-ca.pk  --cert origin-ca.crt -n ingress-nginx
+  when: kubectl_context.rc == 0

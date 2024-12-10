@@ -106,13 +106,20 @@
         - ansible_facts.services['k3s.service'] is defined
         - ansible_facts.services['k3s.service'].state == 'running'
         - service_file_single.changed or service_file_ha.changed
-      ansible.builtin.service:
+      ansible.builtin.systemd:
         name: k3s
+        daemon_reload: true
         state: restarted
 
-    # - name: Enable and check K3s service
-    #   ansible.builtin.command:
-    #     cmd: k3s service --write-kubeconfig-mode=644
+
+    
+    - name: Enable and check K3s service
+      when: ansible_facts.services['k3s.service'] is not defined or ansible_facts.services['k3s.service'].state != 'running'
+      ansible.builtin.systemd:
+        name: k3s
+        daemon_reload: true
+        state: started
+        enabled: true
 
     - name: Pause to allow first server startup
       when: (groups[server_group] | length) > 1
@@ -129,6 +136,14 @@
 
     # Copy the k3s config to a second file to detect changes.
     # If no changes are found, we can skip copying the kubeconfig to the control node.
+
+    - name: Start k3s server temporarily to generate k3s.yaml
+      ansible.builtin.shell:
+        cmd: timeout 3s k3s server # --no-deploy traefik
+      ignore_errors: true
+      register: k3s_temp_start
+      changed_when: false
+
     - name: Copy k3s.yaml to second file
       ansible.builtin.copy:
         src: /etc/rancher/k3s/k3s.yaml
