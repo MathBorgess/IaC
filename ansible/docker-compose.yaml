@@ -1,13 +1,14 @@
-version: "3"
+version: "3.9"
 
 services:
   control:
     build: .
     container_name: control
     command: >
-      bash -c "tail -f /dev/null &&
-      service ssh start"
+      bash -c "tail -f /dev/null"
     hostname: control
+    ports:
+      - "6443:6443"
     volumes:
       - .:/root/ansible
 
@@ -15,14 +16,12 @@ services:
     build: .
     container_name: node1
     command: >
-      bash -c "tail -f /dev/null &&
-      service ssh start"
+      bash -c "tail -f /dev/null"
     hostname: node1
 
   node2:
     build: .
     container_name: node2
     command: >
-      bash -c "tail -f /dev/null &&
-      service ssh start"
+      bash -c "tail -f /dev/null"
     hostname: node2
