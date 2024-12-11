@@ -1,14 +1,14 @@
 data "aws_ami" "ubuntu" {
   most_recent = true
-
+  owners      = ["amazon"]
   filter {
-    name   = ""
-    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
+    name   = "architecture"
+    values = ["x86_64"]
   }
-
   filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
+    name   = "name"
+    values = ["al2023-ami-2023.*"]
+    # values = ["amzn2-ami-kernel-5.10-hvm*"]
   }
 }
 

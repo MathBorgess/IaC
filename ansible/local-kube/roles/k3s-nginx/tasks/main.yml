@@ -1,0 +1,62 @@
+---
+- include_tasks: setup-Debian.yml
+
+- name: Apply NGINX ingress controller if kubectl is configured
+  k8s:
+    state: present
+    
+    definition: "{{ lookup('url', 'https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v{{ingress_version}}/deploy/static/provider/cloud/deploy.yaml', split_lines=False ) }}"
+    kubeconfig: /opt/compose/kubeconfig.yaml
+
+- name: Wait for NGINX ingress controller to be ready
+  k8s_info:
+    kind: Pod
+    namespace: ingress-nginx
+    kubeconfig: /opt/compose/kubeconfig.yaml
+    label_selectors:
+      - app.kubernetes.io/component=controller
+  register: nginx_controller
+  until: nginx_controller.resources[0].status.phase == 'Running'
+  retries: 3
+  delay: 10
+
+- name: Check if certificate files exist
+  stat:
+    path: "files/{{ item }}"
+  register: cert_files
+  with_items:
+    - origin-ca.pk
+    - origin-ca.crt
+  delegate_to: localhost
+  failed_when: not cert_files.stat.exists
+
+
+- name: Copy origin-ca.pk file to remote host
+  if: cert_files.stat.exists
+  copy:
+    src: files/origin-ca.pk
+    dest: ./origin-ca.pk
+    mode: '0600'
+
+- name: Copy origin-ca.crt file to remote host
+  if: cert_files.stat.exists
+  copy:
+    src: files/origin-ca.crt
+    dest: ./origin-ca.crt
+    mode: '0600'
+
+- name: Create secret for ingress controller
+  if: cert_files.stat.exists
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: ingress-tls
+        namespace: ingress-nginx
+      data:
+        tls.crt: "{{ lookup('file', 'origin-ca.crt') | b64encode }}"
+        tls.key: "{{ lookup('file', 'origin-ca.pk') | b64encode }}"
+      type: kubernetes.io/tls
+    kubeconfig: /opt/compose/kubeconfig.yaml

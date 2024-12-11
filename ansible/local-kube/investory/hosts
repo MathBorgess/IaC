@@ -1,0 +1,14 @@
+[aws]
+3.141.153.74
+18.116.67.177
+
+[vlab-local]
+150.161.41.172
+
+[vlab-local:vars]
+ansible_user=inovaula
+ansible_ssh_pass=654321
+
+[all:vars]
+ansible_ssh_private_key_file=inovaulaKey.pem
+ansible_user=ubuntu
