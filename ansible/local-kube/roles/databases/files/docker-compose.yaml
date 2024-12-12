@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  postgres-bq:
+    image: postgres:latest
+    container_name: postgres-bq
+    environment:
+      POSTGRES_DB: inovaula
+      POSTGRES_USER: inovaula
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_bq_data__:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  postgres-inovaula:
+    image: postgres:latest
+    container_name: postgres-inovaula
+    environment:
+      POSTGRES_DB: inovaula
+      POSTGRES_USER: inovaula
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_inovaula_data__:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  postgres-cmr:
+    image: postgres:latest
+    container_name: postgres-cmr
+    environment:
+      POSTGRES_DB: cmr_inovaula
+      POSTGRES_USER: inovaula
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_cmr_data__:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_bq_data__:
+  postgres_inovaula_data__:
+  postgres_cmr_data__:

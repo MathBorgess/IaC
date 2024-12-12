@@ -1,0 +1,11 @@
+---
+- name: Deploy application
+  hosts: vlab-local
+  become: true
+  become_exe: sudo -s
+  become_user: root
+  become_method: sudo
+  vars:
+    ansible_become_pass: 654321
+  roles:
+    - set-local-down
