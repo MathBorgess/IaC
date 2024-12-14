@@ -1,0 +1,26 @@
+---
+# tasks file for k3s-containers-setup
+- name: Create working directory
+  file:
+    path: /opt/compose
+    state: directory
+    mode: '0755'
+
+- name: Copy docker-compose file
+  copy:
+    src: docker-compose.yaml
+    dest: /opt/compose/docker-compose.yaml
+    mode: '0644'
+
+- name: Deploy containers with docker-compose
+  community.docker.docker_compose_v2:
+    project_src: /opt/compose
+    state: present
+
+- name: Get kubeconfig content
+  command: cat /opt/compose/kubeconfig.yaml
+  register: kubeconfig_content
+
+- name: Display kubeconfig
+  debug:
+    var: kubeconfig_content.stdout

@@ -1,0 +1,53 @@
+---
+- include_tasks: setup-Debian.yml
+
+- name: Copy Ingress template file to remote host
+  copy:
+    src: files/ingress-template.yaml
+    dest: ./ingress-template.yaml
+    mode: '0600'
+
+- name: Apply NGINX ingress controller
+  k8s:
+    state: present
+    definition: "{{ lookup('file', './ingress-template.yaml') | from_yaml_all }}"
+    kubeconfig: /opt/compose/kubeconfig.yaml
+
+# - name: Wait for NGINX ingress controller to be ready
+#   k8s_info:
+#     kind: Pod
+#     namespace: ingress-nginx
+#     kubeconfig: /opt/compose/kubeconfig.yaml
+#     label_selectors:
+#       - app.kubernetes.io/component=controller
+#   register: nginx_controller
+#   until: nginx_controller.resources[0].status.phase == 'Running'
+#   retries: 3
+#   delay: 10
+
+- name: Copy privkey.pem file to remote host
+  copy:
+    src: files/privkey.pem
+    dest: ./privkey.pem
+    mode: '0600'
+
+- name: Copy cert.pem file to remote host
+  copy:
+    src: files/cert.pem
+    dest: ./cert.pem
+    mode: '0600'
+
+- name: Create secret for ingress controller
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: ingress-tls
+        namespace: ingress-nginx
+      data:
+        tls.crt: "{{ lookup('file', 'cert.pem') | b64encode }}"
+        tls.key: "{{ lookup('file', 'privkey.pem') | b64encode }}"
+      type: kubernetes.io/tls
+    kubeconfig: /opt/compose/kubeconfig.yaml

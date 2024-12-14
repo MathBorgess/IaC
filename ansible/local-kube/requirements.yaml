@@ -1,6 +1,0 @@
----
-collections:
-  - name: community.docker
-    version: latest
-  - name: kubernetes.core
-    version: latest

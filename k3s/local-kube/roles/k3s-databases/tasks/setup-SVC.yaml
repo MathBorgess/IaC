@@ -1,0 +1,126 @@
+---
+- name: Create postgres namespace
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: {{ namespace }}
+    kubeconfig: /opt/compose/kubeconfig.yaml
+
+- name: Create postgres ConfigMap
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: postgres-secret
+        namespace: {{ namespace }}
+        labels:
+          app: postgres
+      data:
+        POSTGRES_DB: {{ POSTGRES_DB }}
+        POSTGRES_USER: {{ POSTGRES_USER }}
+        POSTGRES_PASSWORD: {{ POSTGRES_PASSWORD }}
+    kubeconfig: /opt/compose/kubeconfig.yaml
+
+- name: Create postgres PersistentVolume
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: PersistentVolume
+      metadata:
+        name: postgres-volume
+        namespace: {{ namespace }}
+        labels:
+          type: local
+          app: postgres
+      spec:
+        storageClassName: manual
+        capacity:
+          storage: 2Gi
+        accessModes:
+          - ReadWriteMany
+        hostPath:
+          path: /data/postgresql
+    kubeconfig: /opt/compose/kubeconfig.yaml
+
+- name: Create postgres PersistentVolumeClaim
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: postgres-volume-claim
+        namespace: {{ namespace }}
+        labels:
+          app: postgres
+      spec:
+        storageClassName: manual
+        accessModes:
+          - ReadWriteMany
+        resources:
+          requests:
+            storage: 2Gi
+    kubeconfig: /opt/compose/kubeconfig.yaml
+
+- name: Create postgres Deployment
+  k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: postgres
+        namespace: {{ namespace }}
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: postgres
+        template:
+          metadata:
+            labels:
+              app: postgres
+          spec:
+            containers:
+              - name: postgres
+                image: 'postgres:latest'
+                imagePullPolicy: IfNotPresent
+                ports:
+                  - containerPort: 5432
+                envFrom:
+                  - configMapRef:
+                      name: postgres-secret
+                volumeMounts:
+                  - mountPath: /var/lib/postgresql/data
+                    name: postgresdata
+            volumes:
+              - name: postgresdata
+                persistentVolumeClaim:
+                  claimName: postgres-volume-claim
+    kubeconfig: /opt/compose/kubeconfig.yaml
+
+- name: Create postgres Service
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: postgres
+        namespace: {{ namespace }}
+        labels:
+          app: postgres
+      spec:
+        type: NodePort
+        ports:
+          - port: 5432
+        selector:
+          app: postgres
+    kubeconfig: /opt/compose/kubeconfig.yaml
+  

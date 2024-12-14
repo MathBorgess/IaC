@@ -1,2 +1,7 @@
 ---
+kubernetes_version: '1.31'
 ingress_version: "1.12.0-beta.0"  # noqa var-naming[no-role-prefix]
+kubelet_environment_file_path: /etc/default/kubelet
+k8s_url_apt_key: "https://pkgs.k8s.io/core:/stable:/v{{ kubernetes_version }}/deb/Release.key"
+k8s_gpgpath: /usr/share/keyrings/kubernetes-apt-keyring.gpg
+k8s_repository: "https://pkgs.k8s.io/core:/stable:/v{{ kubernetes_version }}/deb/"

@@ -1,0 +1,6 @@
+---
+namespace: postgres
+dump: inovaula
+POSTGRES_DB: inovaula
+POSTGRES_USER: inovaula
+POSTGRES_PASSWORD: admin
