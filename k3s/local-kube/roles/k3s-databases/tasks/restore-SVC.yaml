@@ -1,0 +1,37 @@
+---
+
+- name: Wait for postgres SVC to be ready
+  k8s_info:
+    kind: Deployment
+    namespace: {{ namespace }}
+    kubeconfig: /opt/compose/kubeconfig.yaml
+    label_selectors:
+      - app=postgres
+  register: postgres_svc
+
+- name: Get pods from postgres namespace
+  k8s_info:
+    kind: Pod
+    namespace: {{ namespace }}
+    kubeconfig: /opt/compose/kubeconfig.yaml
+  register: postgres_pods
+
+- name: Copy dumps file to the remote pod if the pod was created by now
+  when: postgres_pods.changed == true
+  kubernetes.core.k8s_cp:
+    namespace: {{ namespace }}
+    pod: "{{ item.metadata.name }}"
+    remote_path: /tmp/dumps
+    local_path: ./dumps
+    kubeconfig: /opt/compose/kubeconfig.yaml
+  loop: "{{ postgres_pods.resources }}"
+
+- name: Exec pg_restore in the remote if the pod was created by now
+  when: postgres_pods.changed == true
+  kubernetes.core.k8s_exec:
+    namespace: {{ namespace }}
+    pod: "{{ item.metadata.name }}"
+    command: pg_restore -U {{POSTGRES_USER}} -d {{POSTGRES_DB}} /tmp/dumps/{{dump}}.dump
+    kubeconfig: /opt/compose/kubeconfig.yaml
+  loop: "{{ postgres_pods.resources }}"
+  

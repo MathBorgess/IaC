@@ -1,0 +1,37 @@
+---
+
+# export PGMASTER=$(kubectl get pods -o jsonpath={.items..metadata.name} -l application=spilo,cluster-name=acid-minimal-cluster,spilo-role=master -n default)
+- name: Get PGMaster pod name
+  kubernetes.core.k8s_info:
+    kind: Pod
+    namespace: {{namespace}}
+    label_selectors:
+      - application=spilo
+      - cluster-name={{namespace}}-postgres-cluster
+      - spilo-role=master
+  register: master_pod
+
+- name: Set PGMaster variable
+  set_fact:
+    pgmaster: "{{ master_pod.resources[0].metadata.name }}"
+
+- name: Copy dumps file to the remote pod if the pod was created by now
+  when: master_pod.changed == true
+  kubernetes.core.k8s_cp:
+    namespace: default
+    pod: "{{ pgmaster }}"
+    remote_path: /tmp/dumps
+    local_path: ./dumps
+    kubeconfig: /opt/compose/kubeconfig.yaml
+
+- name: Exec pg_restore in the remote if the pod was created by now
+  when: master_pod.changed == true
+  kubernetes.core.k8s_exec:
+    namespace: default
+    pod: "{{ pgmaster }}"
+    command:
+      - /bin/bash
+      - -c
+      - |
+        pg_restore -U {{POSTGRES_USER}} -d {{POSTGRES_DB}} -h localhost -p 5432 -v /tmp/dumps/{{dump}}.dump
+    kubeconfig: /opt/compose/kubeconfig.yaml

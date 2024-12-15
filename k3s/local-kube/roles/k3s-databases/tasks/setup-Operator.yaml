@@ -1,0 +1,71 @@
+---
+- name: Create manifest dir on remote host
+  file:
+    path: "/opt/manifests"
+    state: directory
+- name: Create ui manifest dir on remote host
+  file:
+    path: "/opt/ui-manifests"
+    state: directory
+
+
+- name: Copy manifests file to remote host
+  copy:
+    src: files/{{item.path}}/{{item.object}}
+    dest: /opt/{{item.path}}/{{item}}
+    mode: '0600'
+  loop:
+    - {object: "configmap.yaml", path: "manifests"}
+    - {object: "operator-service-account-rbac.yaml", path: "manifests"}
+    - {object: "postgres-operator.yaml", path: "manifests"}
+    - {object: "api-service.yaml", path: "manifests"}
+    - {object: "service.yaml", path: "ui-manifests"}
+    - {object: "deployment.yaml", path: "ui-manifests"}
+    - {object: "ingress.yaml", path: "ui-manifests"}
+    - {object: "kustomization.yaml", path: "ui-manifests"}
+    - {object: "ui-service-account-rbac.yaml", path: "ui-manifests"}
+
+- name: Create k8s configuration
+  k8s:
+    state: present
+    definition: "{{ lookup('file', '/opt/{{item.path}}/{{item.object}}') | from_yaml_all }}"
+    kubeconfig: /opt/compose/kubeconfig.yaml
+  loop:
+    - {object: "configmap.yaml", path: "manifests"}
+    - {object: "operator-service-account-rbac.yaml", path: "manifests"}
+    - {object: "postgres-operator.yaml", path: "manifests"}
+    - {object: "api-service.yaml", path: "manifests"}
+    - {object: "service.yaml", path: "ui-manifests"}
+    - {object: "deployment.yaml", path: "ui-manifests"}
+    - {object: "ingress.yaml", path: "ui-manifests"}
+    - {object: "kustomization.yaml", path: "ui-manifests"}
+    - {object: "ui-service-account-rbac.yaml", path: "ui-manifests"}
+
+- name: Creating a minimal postgres
+  k8s:
+    state: present
+    definition: 
+      apiVersion: "acid.zalan.do/v1"
+      kind: postgresql
+      metadata:
+        name: "{{namespace}}-postgres-cluster"
+        namespace: {{namespace}}
+      spec:
+        teamId: "{{namespace}}"
+        volume:
+          size: 1Gi
+        numberOfInstances: 1
+        users:
+          {{POSTGRES_USER}}:  # database owner
+          - superuser
+          - createdb
+          user: []  # role for application foo
+        databases:
+          {{POSTGRES_DB}}: {{POSTGRES_USER}}  # dbname: owner
+        preparedDatabases:
+          bar: {}
+        postgresql:
+          version: "16"
+    kubeconfig: /opt/compose/kubeconfig.yaml
+
+- include_tasks: restore-Operator.yaml

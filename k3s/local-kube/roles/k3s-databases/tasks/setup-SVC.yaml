@@ -1,14 +1,4 @@
 ---
-- name: Create postgres namespace
-  k8s:
-    state: present
-    definition:
-      apiVersion: v1
-      kind: Namespace
-      metadata:
-        name: {{ namespace }}
-    kubeconfig: /opt/compose/kubeconfig.yaml
-
 - name: Create postgres ConfigMap
   k8s:
     state: present
@@ -123,4 +113,5 @@
         selector:
           app: postgres
     kubeconfig: /opt/compose/kubeconfig.yaml
-  
+
+- include_tasks: restore-SVC.yaml

@@ -1,0 +1,14 @@
+---
+- name: Copy postgres file to remote host
+  copy:
+    src: files/postgres-svc.yaml
+    dest: ./postgres-svc.yaml
+    mode: '0600'
+
+- name: Create postgres SVC
+  k8s:
+    state: present
+    definition: "{{ lookup('file', './postgres-svc.yaml') | from_yaml_all }}"
+    kubeconfig: /opt/compose/kubeconfig.yaml
+
+- include_tasks: restore-SVC.yaml
