@@ -1,0 +1,59 @@
+name: PR Workflow
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  check_pr_size:
+    name: Check PR size doesn't break set limit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - id: get_total_lines_changed
+        run: |
+          size=$(git diff origin/${{ github.event.pull_request.base.ref }} --stat \
+          | grep -v .lock \
+          | grep -v Bin \
+          | awk -F"|" '{ print $2 }' \
+          | awk '{ print $1 }' \
+          | sed '/^$/d' \
+          | paste -sd+ - \
+          | bc)
+
+          echo "size=${size}" >> $GITHUB_ENV
+          echo ""
+          echo "Total lines changed (note: *.lock files are excluded from this count): "
+          echo $size
+        shell: bash
+
+      - run: |
+          if [[ $size -gt 400 ]] ; then
+            echo "Warning - total lines changed is greater than 400".
+            echo "Please consider breaking this PR down."
+            exit 1
+          fi
+      - run: |
+          if [[ $size -lt 200 ]] ; then
+            echo "Warning - total lines changed is less than 200".
+            echo "Please consider make greater PRs in the future."
+            exit 1
+          fi
+        shell: bash
+
+  test-and-review:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # - name: Run tests
+      #   run: npm test
+
+      # - name: Lint code
+      #   run: npm run lint

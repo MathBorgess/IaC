@@ -1,0 +1,48 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build Project
+        run: npm run build
+
+      - name: Setup SSH
+        run: |
+          printf %s "${{ secrets.INOVAULA_PEM }}" > ./inovaulaKey.pem
+
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.INOVAULA_PEM }}
+          known_hosts: ec2-18-116-67-177.us-east-2.compute.amazonaws.com
+
+      - name: Adding Known Hosts
+        run: ssh-keyscan -H ec2-18-116-67-177.us-east-2.compute.amazonaws.com >> ~/.ssh/known_hosts
+
+      - name: Deploy with rsync
+        run: |
+          eval $(ssh-agent -s)
+          ssh-add ~/.ssh/id_rsa
+          rsync -avz -e "ssh -i ./inovaulaKey.pem -o StrictHostKeyChecking=no -vvv" ./dist/ ubuntu@ec2-18-116-67-177.us-east-2.compute.amazonaws.com:/home/ubuntu/projects/beta-inovaula-hub/inovaula-client
+
+      - name: Restart Staging PM2
+        run: |
+          ssh -i ./inovaulaKey.pem -o StrictHostKeyChecking=no ubuntu@ec2-18-116-67-177.us-east-2.compute.amazonaws.com 'sudo su -c "cd projects && pm2 ls && pm2 restart app.js"'
